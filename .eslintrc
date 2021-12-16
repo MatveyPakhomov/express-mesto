@@ -1,4 +1,14 @@
 {
   "extends": "airbnb-base",
-  "allow": ["_id"]
+  "rules": {
+    "no-underscore-dangle": 0,
+    "quotes": 0,
+    "comma-dangle": 0,
+    "implicit-arrow-linebreak": 0,
+    "function-paren-newline": 0,
+    "no-shadow": 0,
+    "object-curly-newline": 0,
+    "no-console": 0
+
+  }
 }
