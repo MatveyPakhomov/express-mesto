@@ -4,7 +4,7 @@ function getCards(req, res) {
   return Card.find({})
     .populate(["owner", "likes"])
     .then((cards) => res.send({ data: cards }))
-    .catch(() => res.status(500).send({ message: "Произошла ошибка" }));
+    .catch(() => res.status(500).send({ message: "Произошла ошибка." }));
 }
 
 function createCard(req, res) {
@@ -13,13 +13,24 @@ function createCard(req, res) {
 
   return Card.create({ name, link, owner: ownerId })
     .then((card) => res.send({ data: card }))
-    .catch(() => res.status(400).send({ message: "Переданы некорректные данные при создании карточки" }));
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        res.status(400).send({
+          message: `Переданы некорректные данные при создании карточки. ${err.message}`,
+        });
+
+        return;
+      }
+      res.status(500).send({ message: "Произошла ошибка." });
+    });
 }
 
 function deleteCard(req, res) {
   return Card.findByIdAndRemove(req.params.cardId)
-    .then(() => res.send({ message: "Карточка удалена" }))
-    .catch(() => res.status(404).send({ message: "Карточка с указанным _id не найдена" }));
+    .then(() => res.send({ message: "Карточка удалена." }))
+    .catch(() =>
+      res.status(404).send({ message: "Карточка с указанным _id не найдена." })
+    );
 }
 
 function likeCard(req, res) {
@@ -30,8 +41,24 @@ function likeCard(req, res) {
     { $addToSet: { likes: ownerId } }, // добавить _id в массив, если его там нет
     { new: true }
   )
-    .then((like) => res.send({ data: like }))
-    .catch(() => res.status(400).send({ message: "Переданы некорректные данные для постановки лайка" }));
+    .then((like) => {
+      if (!like) {
+        res
+          .status(404)
+          .send({ message: "Передан несуществующий _id карточки." });
+      }
+      res.send({ data: like });
+    })
+    .catch((err) => {
+      if (err.name === "CastError") {
+        res.status(400).send({
+          message: "Переданы некорректные данные для постановки лайка.",
+        });
+
+        return;
+      }
+      res.status(500).send({ message: "Произошла ошибка." });
+    });
 }
 
 function dislikeCard(req, res) {
@@ -42,8 +69,24 @@ function dislikeCard(req, res) {
     { $pull: { likes: ownerId } }, // убрать _id из массива
     { new: true }
   )
-    .then((like) => res.send({ data: like }))
-    .catch(() => res.status(400).send({ message: "Переданы некорректные данные для снятии лайка" }));
+    .then((like) => {
+      if (!like) {
+        res
+          .status(404)
+          .send({ message: "Передан несуществующий _id карточки." });
+      }
+      res.send({ data: like });
+    })
+    .catch((err) => {
+      if (err.name === "CastError") {
+        res.status(400).send({
+          message: "Переданы некорректные данные для снятии лайка.",
+        });
+
+        return;
+      }
+      res.status(500).send({ message: "Произошла ошибка." });
+    });
 }
 
 module.exports = { getCards, createCard, deleteCard, likeCard, dislikeCard };
