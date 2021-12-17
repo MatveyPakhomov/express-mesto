@@ -30,10 +30,21 @@ function getUserById(req, res) {
         res
           .status(404)
           .send({ message: "Пользователь по указанному _id не найден." });
+
+        return;
       }
       res.status(200).send(user);
     })
-    .catch(() => res.status(500).send({ message: "Произошла ошибка." }));
+    .catch((err) => {
+      if (err.name === "CastError") {
+        res.status(400).send({
+          message: "Переданы некорректные данные для поиска пользователя.",
+        });
+
+        return;
+      }
+      res.status(500).send({ message: "Произошла ошибка." });
+    });
 }
 
 function updateProfile(req, res) {
@@ -53,6 +64,8 @@ function updateProfile(req, res) {
         res
           .status(404)
           .send({ message: "Пользователь с указанным _id не найден." });
+
+        return;
       }
       res.send({ data: user });
     })
@@ -86,6 +99,8 @@ function updateAvatar(req, res) {
         res
           .status(404)
           .send({ message: "Пользователь с указанным _id не найден." });
+
+        return;
       }
       res.send({ data: avatar });
     })
