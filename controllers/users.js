@@ -27,7 +27,7 @@ function login(req, res, next) {
 
       // отправим токен, браузер сохранит его в куках
       res
-        .status(201)
+        .status(200)
         .cookie("jwt", token, {
           maxAge: 3600000 * 24 * 7,
           httpOnly: true,

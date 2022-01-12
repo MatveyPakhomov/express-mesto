@@ -1,15 +1,12 @@
 const jwt = require("jsonwebtoken");
-
-function handleAuthError(res) {
-  res.status(403).send({ message: "Необходимо авторизоваться." });
-}
+const UnauthorizedError = require("../errors/unauthorized-err");
 
 function auth(req, res, next) {
   const token = req.cookies.jwt;
   const { NODE_ENV, JWT_SECRET } = process.env;
 
   if (!token) {
-    return handleAuthError(res);
+    throw new UnauthorizedError("Необходимо авторизоваться.");
   }
 
   let payload;
@@ -22,7 +19,7 @@ function auth(req, res, next) {
     );
   } catch (err) {
     // отправим ошибку, если не получилось
-    return handleAuthError(res);
+    throw new UnauthorizedError("Необходимо авторизоваться.");
   }
 
   req.user = payload; // записываем пейлоуд в объект запроса

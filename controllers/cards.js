@@ -1,4 +1,7 @@
 const Card = require("../models/card");
+const NotFoundError = require("../errors/not-found-err");
+const BadRequestError = require("../errors/bad-request-err");
+const ForbiddenError = require("../errors/forbidden-err");
 
 function getCards(req, res, next) {
   return Card.find({})
@@ -15,11 +18,11 @@ function createCard(req, res, next) {
     .then((card) => res.send({ card }))
     .catch((err) => {
       if (err.name === "ValidationError") {
-        res.status(400).send({
-          message: `Переданы некорректные данные при создании карточки. ${err.message}`,
-        });
-
-        return;
+        next(
+          new BadRequestError(
+            `Переданы некорректные данные при создании карточки. ${err.message}`
+          )
+        );
       }
       next(err);
     });
@@ -31,25 +34,16 @@ function deleteCard(req, res, next) {
   return Card.findById(req.params.cardId)
     .populate(["owner"])
     .then((data) => {
-      if (!data) {
-        res
-          .status(404)
-          .send({ message: "Карточка с указанным _id не найдена." });
+      const ownerId = data.owner._id.toString();
 
-        return;
+      if (!data) {
+        throw new NotFoundError("Карточка с указанным _id не найдена.");
       }
 
-      // остаить так, или внести в .eslintrc?
-      // или привести типы к единому и использовать строгое сравнение?
-
-      // eslint-disable-next-line eqeqeq
-      if (data.owner._id != userId) {
-        res.status(403).send({
-          message:
-            "Невовзможно удалить карточку созданную другим пользователем",
-        });
-
-        return;
+      if (ownerId !== userId) {
+        throw new ForbiddenError(
+          "Невовзможно удалить карточку созданную другим пользователем"
+        );
       }
 
       Card.findByIdAndRemove(req.params.cardId).then(() =>
@@ -58,12 +52,11 @@ function deleteCard(req, res, next) {
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        res.status(400).send({
-          message: "Переданы некорректные данные для удаления карточки.",
-          err,
-        });
-
-        return;
+        next(
+          new BadRequestError(
+            "Переданы некорректные данные для удаления карточки."
+          )
+        );
       }
       next(err);
     });
@@ -79,21 +72,17 @@ function likeCard(req, res, next) {
   )
     .then((like) => {
       if (!like) {
-        res
-          .status(404)
-          .send({ message: "Передан несуществующий _id карточки." });
-
-        return;
+        throw new NotFoundError("Передан несуществующий _id карточки.");
       }
       res.send({ data: like });
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        res.status(400).send({
-          message: "Переданы некорректные данные для постановки лайка.",
-        });
-
-        return;
+        next(
+          new BadRequestError(
+            "Переданы некорректные данные для постановки лайка."
+          )
+        );
       }
       next(err);
     });
@@ -109,21 +98,15 @@ function dislikeCard(req, res, next) {
   )
     .then((like) => {
       if (!like) {
-        res
-          .status(404)
-          .send({ message: "Передан несуществующий _id карточки." });
-
-        return;
+        throw new NotFoundError("Передан несуществующий _id карточки.");
       }
       res.send({ data: like });
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        res.status(400).send({
-          message: "Переданы некорректные данные для снятии лайка.",
-        });
-
-        return;
+        next(
+          new BadRequestError("Переданы некорректные данные для снятии лайка.")
+        );
       }
       next(err);
     });

@@ -8,9 +8,10 @@ const { celebrate, Joi, errors } = require("celebrate");
 
 const user = require("./routes/users");
 const card = require("./routes/cards");
-
 const { login, createUser } = require("./controllers/users");
 const { auth } = require("./middlewares/auth");
+const { isValidURL } = require("./utils/methods");
+const NotFoundError = require("./errors/not-found-err");
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -33,12 +34,13 @@ app.post(
 app.post(
   "/signup",
   celebrate({
-    body: Joi.object()
-      .keys({
-        email: Joi.string().required().email(),
-        password: Joi.string().required().min(8),
-      })
-      .unknown(true),
+    body: Joi.object().keys({
+      name: Joi.string().default("Жак-Ив Кусто").min(2).max(30),
+      about: Joi.string().default("Исследователь").min(2).max(30),
+      avatar: Joi.string().custom(isValidURL),
+      email: Joi.string().required().email(),
+      password: Joi.string().required().min(8),
+    }),
   }),
   createUser
 );
@@ -49,6 +51,10 @@ app.use("/", auth, user);
 app.use("/", auth, card);
 
 app.use(errors());
+
+app.use("*", (req, res, next) => {
+  next(new NotFoundError("Страница не найдена"));
+});
 
 app.use((err, req, res, next) => {
   // если у ошибки нет статуса, выставляем 500
