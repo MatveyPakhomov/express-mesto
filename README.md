@@ -1,5 +1,5 @@
-# Проектная работа 13
-### В этой работе я начинаю создавать сервер для проекта Mesto.
+# Проектная работа 14?
+### Авторизация и регистрация пользователя на бэкенде.
 ### Используемые инструменты:
 1. Node.js
 2. Express
@@ -7,7 +7,8 @@
 4. Eslint
 5. Nodemon
 6. Postman
-7. MongoDB Compass
-8. Controllers & Routes
+7. RegEx
+8. Validator
+9. Controllers & Routes
 
 ### Фронтенд проекта на GitHub до перехода на React - https://matveypakhomov.github.io/mesto

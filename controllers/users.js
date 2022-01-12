@@ -1,9 +1,58 @@
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
 const User = require("../models/user");
 
-function createUser(req, res) {
-  const { name, about, avatar } = req.body;
+function login(req, res, next) {
+  const { email, password } = req.body;
+  const { NODE_ENV, JWT_SECRET } = process.env;
 
-  return User.create({ name, about, avatar })
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      // аутентификация успешна! пользователь в переменной user
+      // создадим токен
+      const token = jwt.sign(
+        { _id: user._id },
+        NODE_ENV === "production" ? JWT_SECRET : "some-secret-key",
+        {
+          expiresIn: "7d",
+        }
+      );
+
+      if (!token) {
+        res.status(401).send({ message: "Ошибка авторизации" });
+
+        return;
+      }
+
+      // отправим токен, браузер сохранит его в куках
+      res
+        .status(201)
+        .cookie("jwt", token, {
+          maxAge: 3600000 * 24 * 7,
+          httpOnly: true,
+          sameSite: true,
+        })
+        .send({ token })
+        .end();
+    })
+    .catch(next);
+}
+
+function createUser(req, res, next) {
+  const { name, about, avatar, email } = req.body;
+
+  return bcrypt
+    .hash(req.body.password, 10)
+    .then((hash) =>
+      User.create({
+        name,
+        about,
+        avatar,
+        email,
+        password: hash,
+      })
+    )
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
       if (err.name === "ValidationError") {
@@ -13,17 +62,25 @@ function createUser(req, res) {
 
         return;
       }
-      res.status(500).send({ message: "Произошла ошибка." });
+
+      if (err.name === "MongoServerError" && err.code === 11000) {
+        res.status(409).send({
+          message: "Данный email уже зарегистрирован.",
+        });
+
+        return;
+      }
+      next(err);
     });
 }
 
-function getUsers(req, res) {
+function getUsers(req, res, next) {
   return User.find({})
     .then((users) => res.status(200).send({ data: users }))
-    .catch(() => res.status(500).send({ message: "Произошла ошибка." }));
+    .catch(next);
 }
 
-function getUserById(req, res) {
+function getUserById(req, res, next) {
   return User.findById(req.params.id)
     .then((user) => {
       if (!user) {
@@ -43,11 +100,19 @@ function getUserById(req, res) {
 
         return;
       }
-      res.status(500).send({ message: "Произошла ошибка." });
+      next(err);
     });
 }
 
-function updateProfile(req, res) {
+function getProfile(req, res, next) {
+  return User.findById(req.user._id)
+    .then((user) => {
+      res.status(200).send(user);
+    })
+    .catch(next);
+}
+
+function updateProfile(req, res, next) {
   const { name, about } = req.body;
 
   return User.findByIdAndUpdate(
@@ -67,7 +132,7 @@ function updateProfile(req, res) {
 
         return;
       }
-      res.send({ data: user });
+      res.send({ user });
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
@@ -77,11 +142,11 @@ function updateProfile(req, res) {
 
         return;
       }
-      res.status(500).send({ message: "Произошла ошибка." });
+      next(err);
     });
 }
 
-function updateAvatar(req, res) {
+function updateAvatar(req, res, next) {
   const { avatar } = req.body;
 
   return User.findByIdAndUpdate(
@@ -102,7 +167,7 @@ function updateAvatar(req, res) {
 
         return;
       }
-      res.send({ data: avatar });
+      res.send({ avatar });
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
@@ -112,13 +177,15 @@ function updateAvatar(req, res) {
 
         return;
       }
-      res.status(500).send({ message: "Произошла ошибка." });
+      next(err);
     });
 }
 
 module.exports = {
+  login,
   createUser,
   getUsers,
+  getProfile,
   getUserById,
   updateProfile,
   updateAvatar,

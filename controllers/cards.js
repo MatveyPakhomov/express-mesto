@@ -1,18 +1,18 @@
 const Card = require("../models/card");
 
-function getCards(req, res) {
+function getCards(req, res, next) {
   return Card.find({})
     .populate(["owner", "likes"])
-    .then((cards) => res.send({ data: cards }))
-    .catch(() => res.status(500).send({ message: "Произошла ошибка." }));
+    .then((cards) => res.send({ cards }))
+    .catch(next);
 }
 
-function createCard(req, res) {
+function createCard(req, res, next) {
   const ownerId = req.user._id;
   const { name, link } = req.body;
 
-  return Card.create({ name, link, owner: ownerId })
-    .then((card) => res.send({ data: card }))
+  return Card.create({ name, link, owner: { _id: ownerId } })
+    .then((card) => res.send({ card }))
     .catch((err) => {
       if (err.name === "ValidationError") {
         res.status(400).send({
@@ -21,12 +21,15 @@ function createCard(req, res) {
 
         return;
       }
-      res.status(500).send({ message: "Произошла ошибка." });
+      next(err);
     });
 }
 
-function deleteCard(req, res) {
-  return Card.findByIdAndRemove(req.params.cardId)
+function deleteCard(req, res, next) {
+  const userId = req.user._id;
+
+  return Card.findById(req.params.cardId)
+    .populate(["owner"])
     .then((data) => {
       if (!data) {
         res
@@ -35,21 +38,38 @@ function deleteCard(req, res) {
 
         return;
       }
-      res.send({ message: "Карточка удалена." });
+
+      // остаить так, или внести в .eslintrc?
+      // или привести типы к единому и использовать строгое сравнение?
+
+      // eslint-disable-next-line eqeqeq
+      if (data.owner._id != userId) {
+        res.status(403).send({
+          message:
+            "Невовзможно удалить карточку созданную другим пользователем",
+        });
+
+        return;
+      }
+
+      Card.findByIdAndRemove(req.params.cardId).then(() =>
+        res.send({ message: "Карточка удалена." })
+      );
     })
     .catch((err) => {
       if (err.name === "CastError") {
         res.status(400).send({
           message: "Переданы некорректные данные для удаления карточки.",
+          err,
         });
 
         return;
       }
-      res.status(500).send({ message: "Произошла ошибка." });
+      next(err);
     });
 }
 
-function likeCard(req, res) {
+function likeCard(req, res, next) {
   const ownerId = req.user._id;
 
   return Card.findByIdAndUpdate(
@@ -75,11 +95,11 @@ function likeCard(req, res) {
 
         return;
       }
-      res.status(500).send({ message: "Произошла ошибка." });
+      next(err);
     });
 }
 
-function dislikeCard(req, res) {
+function dislikeCard(req, res, next) {
   const ownerId = req.user._id;
 
   return Card.findByIdAndUpdate(
@@ -105,7 +125,7 @@ function dislikeCard(req, res) {
 
         return;
       }
-      res.status(500).send({ message: "Произошла ошибка." });
+      next(err);
     });
 }
 
