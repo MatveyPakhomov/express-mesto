@@ -147,7 +147,6 @@ function updateAvatar(req, res, next) {
     {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
-      upsert: false, // если пользователь не найден, он будет создан
     }
   )
     .then((avatar) => {
