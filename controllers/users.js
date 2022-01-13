@@ -1,5 +1,9 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const BadRequestError = require("../errors/bad-request-err");
+const ConflictError = require("../errors/conflict-err");
+const NotFoundError = require("../errors/not-found-err");
+const UnauthorizedError = require("../errors/unauthorized-err");
 
 const User = require("../models/user");
 
@@ -20,9 +24,7 @@ function login(req, res, next) {
       );
 
       if (!token) {
-        res.status(401).send({ message: "Ошибка авторизации" });
-
-        return;
+        throw new UnauthorizedError("Ошибка авторизации");
       }
 
       // отправим токен, браузер сохранит его в куках
@@ -56,19 +58,16 @@ function createUser(req, res, next) {
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
       if (err.name === "ValidationError") {
-        res.status(400).send({
-          message: `Переданы некорректные данные при создании пользователя. ${err.message}`,
-        });
-
-        return;
+        // вот это я затроил конечно...
+        next(
+          new BadRequestError(
+            `Переданы некорректные данные при создании пользователя. ${err.message}`
+          )
+        );
       }
 
       if (err.name === "MongoServerError" && err.code === 11000) {
-        res.status(409).send({
-          message: "Данный email уже зарегистрирован.",
-        });
-
-        return;
+        next(new ConflictError("Данный email уже зарегистрирован."));
       }
       next(err);
     });
@@ -84,21 +83,17 @@ function getUserById(req, res, next) {
   return User.findById(req.params.id)
     .then((user) => {
       if (!user) {
-        res
-          .status(404)
-          .send({ message: "Пользователь по указанному _id не найден." });
-
-        return;
+        throw new NotFoundError("Пользователь по указанному _id не найден.");
       }
       res.status(200).send(user);
     })
     .catch((err) => {
       if (err.name === "CastError") {
-        res.status(400).send({
-          message: "Переданы некорректные данные для поиска пользователя.",
-        });
-
-        return;
+        next(
+          new BadRequestError(
+            "Переданы некорректные данные для поиска пользователя."
+          )
+        );
       }
       next(err);
     });
@@ -126,21 +121,17 @@ function updateProfile(req, res, next) {
   )
     .then((user) => {
       if (!user) {
-        res
-          .status(404)
-          .send({ message: "Пользователь с указанным _id не найден." });
-
-        return;
+        throw new NotFoundError("Пользователь с указанным _id не найден.");
       }
       res.send({ user });
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
-        res.status(400).send({
-          message: `Переданы некорректные данные при обновлении профиля. ${err.message}`,
-        });
-
-        return;
+        next(
+          new BadRequestError(
+            `Переданы некорректные данные при обновлении профиля. ${err.message}`
+          )
+        );
       }
       next(err);
     });
@@ -161,21 +152,17 @@ function updateAvatar(req, res, next) {
   )
     .then((avatar) => {
       if (!avatar) {
-        res
-          .status(404)
-          .send({ message: "Пользователь с указанным _id не найден." });
-
-        return;
+        throw new NotFoundError("Пользователь с указанным _id не найден.");
       }
       res.send({ avatar });
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
-        res.status(400).send({
-          message: `Переданы некорректные данные при обновлении аватара. ${err.message}`,
-        });
-
-        return;
+        next(
+          new BadRequestError(
+            `Переданы некорректные данные при обновлении аватара. ${err.message}`
+          )
+        );
       }
       next(err);
     });
