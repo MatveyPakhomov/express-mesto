@@ -58,7 +58,6 @@ function createUser(req, res, next) {
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
       if (err.name === "ValidationError") {
-        // вот это я затроил конечно...
         next(
           new BadRequestError(
             `Переданы некорректные данные при создании пользователя. ${err.message}`
