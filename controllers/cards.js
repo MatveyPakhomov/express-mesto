@@ -34,11 +34,11 @@ function deleteCard(req, res, next) {
   return Card.findById(req.params.cardId)
     .populate(["owner"])
     .then((data) => {
-      const ownerId = data.owner._id.toString();
-
       if (!data) {
         throw new NotFoundError("Карточка с указанным _id не найдена.");
       }
+
+      const ownerId = data.owner._id.toString();
 
       if (ownerId !== userId) {
         throw new ForbiddenError(
