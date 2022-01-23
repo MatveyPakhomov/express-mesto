@@ -13,6 +13,7 @@ const { auth } = require("./middlewares/auth");
 const { isValidURL } = require("./utils/methods");
 const NotFoundError = require("./errors/not-found-err");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
+const { corsProcessing } = require("./middlewares/cors");
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -23,6 +24,7 @@ app.use(bodyParser.json()); // для собирания JSON-формата
 app.use(bodyParser.urlencoded({ extended: true })); // для приёма веб-страниц внутри POST-запроса
 
 app.use(requestLogger); // подключаем логгер запросов
+app.use(corsProcessing);
 
 app.post(
   "/signin",
