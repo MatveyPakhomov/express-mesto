@@ -51,6 +51,7 @@ app.post(
 );
 
 app.use(
+  "*",
   cors({
     origin: [
       "http://pakhomov.students.nomoredomains.rocks",
