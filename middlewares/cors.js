@@ -1,10 +1,8 @@
 // Массив доменов, с которых разрешены кросс-доменные запросы
 const allowedCors = [
-  "https://praktikum.tk",
-  "http://praktikum.tk",
-  "http://localhost:3000",
   "http://pakhomov.students.nomoredomains.rocks",
   "https://pakhomov.students.nomoredomains.rocks",
+  "localhost:3000"
 ];
 
 function corsProcessing(req, res, next) {

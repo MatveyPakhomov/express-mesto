@@ -23,8 +23,8 @@ mongoose.connect("mongodb://localhost:27017/mestodb");
 app.use(bodyParser.json()); // для собирания JSON-формата
 app.use(bodyParser.urlencoded({ extended: true })); // для приёма веб-страниц внутри POST-запроса
 
-app.use(requestLogger); // подключаем логгер запросов
 app.use(corsProcessing());
+app.use(requestLogger); // подключаем логгер запросов
 
 app.post(
   "/signin",
