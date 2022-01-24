@@ -2,7 +2,9 @@
 const allowedCors = [
   "https://praktikum.tk",
   "http://praktikum.tk",
-  "localhost:3000",
+  "http://localhost:3000",
+  "http://pakhomov.students.nomoredomains.rocks",
+  "https://pakhomov.students.nomoredomains.rocks"
 ];
 
 function corsProcessing(req, res, next) {
