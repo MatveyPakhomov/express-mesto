@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
+const cors = require("cors");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
@@ -13,7 +14,6 @@ const { auth } = require("./middlewares/auth");
 const { isValidURL } = require("./utils/methods");
 const NotFoundError = require("./errors/not-found-err");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
-const { corsProcessing } = require("./middlewares/cors");
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -23,7 +23,6 @@ mongoose.connect("mongodb://localhost:27017/mestodb");
 app.use(bodyParser.json()); // для собирания JSON-формата
 app.use(bodyParser.urlencoded({ extended: true })); // для приёма веб-страниц внутри POST-запроса
 
-app.use(corsProcessing());
 app.use(requestLogger); // подключаем логгер запросов
 
 app.post(
@@ -36,6 +35,7 @@ app.post(
   }),
   login
 );
+
 app.post(
   "/signup",
   celebrate({
@@ -48,6 +48,20 @@ app.post(
     }),
   }),
   createUser
+);
+
+app.use(
+  cors({
+    origin: [
+      "http://pakhomov.students.nomoredomains.rocks",
+      "https://pakhomov.students.nomoredomains.rocks",
+      "localhost:3000",
+    ],
+    methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
+    preflightContinue: false,
+    allowedHeaders: ["Content-type", "Origin", "Authorization"],
+    credentials: true,
+  })
 );
 
 app.use(cookieParser());
