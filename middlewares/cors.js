@@ -6,7 +6,7 @@ const allowedCors = [
 ];
 
 // eslint-disable-next-line consistent-return
-function corsRequest(req, res, next) {
+module.exports = (req, res, next) => {
   console.info(allowedCors);
   const { origin } = req.headers; // Сохраняем источник запроса в переменную origin
 
@@ -29,6 +29,4 @@ function corsRequest(req, res, next) {
   }
 
   next();
-}
-
-module.exports = { corsRequest };
+};
