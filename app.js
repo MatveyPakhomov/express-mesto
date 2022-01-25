@@ -1,7 +1,6 @@
 require("dotenv").config();
 
 const express = require("express");
-const cors = require("cors");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
@@ -14,6 +13,7 @@ const { auth } = require("./middlewares/auth");
 const { isValidURL } = require("./utils/methods");
 const NotFoundError = require("./errors/not-found-err");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
+const { corsRequest } = require("./middlewares/cors");
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -50,20 +50,7 @@ app.post(
   createUser
 );
 
-app.use(
-  "*",
-  cors({
-    origin: [
-      "http://pakhomov.students.nomoredomains.rocks",
-      "https://pakhomov.students.nomoredomains.rocks",
-      "localhost:3000",
-    ],
-    methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
-    preflightContinue: false,
-    allowedHeaders: ["Content-type", "Origin", "Authorization"],
-    credentials: true,
-  })
-);
+app.use(corsRequest);
 
 app.use(cookieParser());
 

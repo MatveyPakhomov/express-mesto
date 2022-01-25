@@ -1,4 +1,3 @@
-const app = require("../app");
 // Массив доменов, с которых разрешены кросс-доменные запросы
 const allowedCors = [
   "http://pakhomov.students.nomoredomains.rocks",
@@ -7,7 +6,7 @@ const allowedCors = [
 ];
 
 // eslint-disable-next-line consistent-return
-app.use((req, res, next) => {
+function corsRequest(req, res, next) {
   const { origin } = req.headers; // Сохраняем источник запроса в переменную origin
 
   // проверяем, что источник запроса есть среди разрешённых
@@ -28,4 +27,6 @@ app.use((req, res, next) => {
   }
 
   next();
-});
+}
+
+module.exports = { corsRequest };
