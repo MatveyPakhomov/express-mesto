@@ -7,7 +7,6 @@ const allowedCors = [
 
 // eslint-disable-next-line consistent-return
 module.exports = (req, res, next) => {
-  console.info(allowedCors);
   const { origin } = req.headers; // Сохраняем источник запроса в переменную origin
 
   // проверяем, что источник запроса есть среди разрешённых
@@ -25,6 +24,7 @@ module.exports = (req, res, next) => {
     // разрешаем кросс-доменные запросы с этими заголовками
     res.header("Access-Control-Allow-Headers", requestHeaders);
     // завершаем обработку запроса и возвращаем результат клиенту
+    res.header("Access-Control-Expose-Headers", "Set-Cookie");
     return res.end();
   }
 
