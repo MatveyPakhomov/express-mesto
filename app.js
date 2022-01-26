@@ -26,6 +26,23 @@ app.use(bodyParser.urlencoded({ extended: true })); // для приёма ве�
 
 // app.use(corsRequest);
 
+app.use(
+  "*",
+  cors({
+    // origin: [
+    //   "http://pakhomov.students.nomoredomains.rocks",
+    //   "https://pakhomov.students.nomoredomains.rocks",
+    //   "localhost:3000",
+    // ],
+    methods: ["OPTIONS", "GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    allowedHeaders: ["Content-Type", "origin", "Authorization", "Cookie"],
+    exposedHeaders: ["Set-Cookie"],
+    credentials: true,
+  })
+);
+
 app.use(requestLogger); // подключаем логгер запросов
 
 app.post(
@@ -53,23 +70,22 @@ app.post(
   createUser
 );
 
-app.use(
-  "*",
-  cors({
-    // origin: [
-    //   "http://pakhomov.students.nomoredomains.rocks",
-    //   "https://pakhomov.students.nomoredomains.rocks",
-    //   "localhost:3000",
-    // ],
-    origin: "*",
-    methods: ["OPTIONS", "GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-    allowedHeaders: ["Content-Type", "origin", "Authorization", "Cookie"],
-    exposedHeaders: ["Set-Cookie"],
-    credentials: true,
-  })
-);
+// app.use(
+//   "*",
+//   cors({
+//     // origin: [
+//     //   "http://pakhomov.students.nomoredomains.rocks",
+//     //   "https://pakhomov.students.nomoredomains.rocks",
+//     //   "localhost:3000",
+//     // ],
+//     methods: ["OPTIONS", "GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
+//     preflightContinue: false,
+//     optionsSuccessStatus: 204,
+//     allowedHeaders: ["Content-Type", "origin", "Authorization", "Cookie"],
+//     exposedHeaders: ["Set-Cookie"],
+//     credentials: true,
+//   })
+// );
 
 app.use(cookieParser());
 
