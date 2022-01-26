@@ -33,9 +33,10 @@ function login(req, res, next) {
         .cookie("jwt", token, {
           maxAge: 3600000 * 24 * 7,
           httpOnly: true,
-          sameSite: true,
+          sameSite: "none",
+          domain: "pakhomov.students.nomoredomains.rocks",
         })
-        .send({ token })
+        .send({ message: "Аутентификация пройдена" })
         .end();
     })
     .catch(next);
