@@ -56,11 +56,12 @@ app.post(
 app.use(
   "*",
   cors({
-    origin: [
-      "http://pakhomov.students.nomoredomains.rocks",
-      "https://pakhomov.students.nomoredomains.rocks",
-      "localhost:3000",
-    ],
+    // origin: [
+    //   "http://pakhomov.students.nomoredomains.rocks",
+    //   "https://pakhomov.students.nomoredomains.rocks",
+    //   "localhost:3000",
+    // ],
+    origin: "*",
     methods: ["OPTIONS", "GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
     preflightContinue: false,
     optionsSuccessStatus: 204,
