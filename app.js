@@ -21,17 +21,14 @@ const app = express();
 
 mongoose.connect("mongodb://localhost:27017/mestodb");
 
-app.use(bodyParser.json()); // для собирания JSON-формата
-app.use(bodyParser.urlencoded({ extended: true })); // для приёма веб-страниц внутри POST-запроса
-
 // app.use(corsRequest);
 
 app.use(
   "*",
   cors({
     origin: [
-      "http://pakhomov.students.nomoredomains.rocks",
       "https://pakhomov.students.nomoredomains.rocks",
+      "http://pakhomov.students.nomoredomains.rocks",
       "localhost:3000",
     ],
     methods: ["OPTIONS", "GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
@@ -43,7 +40,10 @@ app.use(
   })
 );
 
+app.use(cookieParser());
 app.use(requestLogger); // подключаем логгер запросов
+app.use(bodyParser.json()); // для собирания JSON-формата
+app.use(bodyParser.urlencoded({ extended: true })); // для приёма веб-страниц внутри POST-запроса
 
 app.post(
   "/signin",
@@ -69,8 +69,6 @@ app.post(
   }),
   createUser
 );
-
-app.use(cookieParser());
 
 app.use("/", auth, user);
 app.use("/", auth, card);

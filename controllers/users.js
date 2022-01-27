@@ -32,7 +32,7 @@ function login(req, res, next) {
         .status(200)
         .cookie("jwt", token, {
           maxAge: 3600000 * 24 * 7,
-          httpOnly: true,
+          secure: true,
           sameSite: "none",
           domain: "pakhomov.students.nomoredomains.rocks",
         })
