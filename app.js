@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
-const cors = require("cors");
+// const cors = require("cors");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
@@ -14,31 +14,31 @@ const { auth } = require("./middlewares/auth");
 const { isValidURL } = require("./utils/methods");
 const NotFoundError = require("./errors/not-found-err");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
-// const { corsRequest } = require("./middlewares/cors");
+const { corsRequest } = require("./middlewares/cors");
 
 const { PORT = 3000 } = process.env;
 const app = express();
 
 mongoose.connect("mongodb://localhost:27017/mestodb");
 
-// app.use(corsRequest);
+app.use(corsRequest);
 
-app.use(
-  "*",
-  cors({
-    origin: [
-      "https://pakhomov.students.nomoredomains.rocks",
-      "http://pakhomov.students.nomoredomains.rocks",
-      "localhost:3000",
-    ],
-    methods: ["OPTIONS", "GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
-    preflightContinue: false,
-    optionsSuccessStatus: 204,
-    allowedHeaders: ["Content-Type", "origin", "Authorization", "Cookie"],
-    exposedHeaders: ["Set-Cookie"],
-    credentials: true,
-  })
-);
+// app.use(
+//   "*",
+//   cors({
+//     origin: [
+//       "https://pakhomov.students.nomoredomains.rocks",
+//       "http://pakhomov.students.nomoredomains.rocks",
+//       "localhost:3000",
+//     ],
+//     methods: ["OPTIONS", "GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
+//     preflightContinue: false,
+//     optionsSuccessStatus: 204,
+//     allowedHeaders: ["Content-Type", "origin", "Authorization", "Cookie"],
+//     exposedHeaders: ["Set-Cookie"],
+//     credentials: true,
+//   })
+// );
 
 app.use(cookieParser());
 app.use(bodyParser.json()); // для собирания JSON-формата
